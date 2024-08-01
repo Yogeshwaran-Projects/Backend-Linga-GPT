@@ -1,0 +1,33 @@
+{
+  "name": "fffuuuukk",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/react": "^3.6.0",
+    "@astrojs/tailwind": "^5.1.0",
+    "@clerk/astro": "^1.0.4",
+    "@clerk/clerk-sdk-node": "^5.0.20",
+    "@clerk/nextjs": "^5.2.8",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@radix-ui/react-avatar": "^1.1.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "ai": "^3.2.36",
+    "astro": "^4.12.2",
+    "ollama-ai-provider": "^0.10.0",
+    "react": "^18.3.1",
+    "react-copy-to-clipboard": "^5.1.0",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
+    "tailwindcss": "^3.4.7"
+  }
+}
