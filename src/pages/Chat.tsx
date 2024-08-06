@@ -1,25 +1,84 @@
 import { useChat } from "ai/react";
 import Markdown from "react-markdown";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStopCircle, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faStopCircle, faPaperPlane, faMicrophone, faImage, faCog, faUser, faQuestionCircle, faRobot, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import * as Avatar from "@radix-ui/react-avatar";
+import { motion } from "framer-motion";
+import Particles from "react-tsparticles";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { coy } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-interface CodeProps {
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-}
 
-const CodeBlock: React.FC<CodeProps> = ({ inline, className, children }) => {
+const colors = {
+  primary: "#000000",  
+  secondary: "#1C1C1C",
+  accent: "#00B0B3",  
+  text: "#FFFFFF",  
+  textSecondary: "#B0B0B0",
+  button: "#00B0B3",
+  buttonHover: "#00D0D3",
+};
+
+const particlesOptions = {
+  background: {
+    color: {
+      value: colors.primary,
+    },
+  },
+  particles: {
+    color: {
+      value: colors.accent,
+    },
+    links: {
+      color: colors.accent,
+      distance: 150,
+      enable: true,
+      opacity: 0.5,
+      width: 1,
+    },
+    collisions: {
+      enable: true,
+    },
+    move: {
+      direction: "none",
+      enable: true,
+      outModes: {
+        default: "bounce",
+      },
+      random: false,
+      speed: 1,
+      straight: false,
+    },
+    number: {
+      density: {
+        enable: true,
+        area: 800,
+      },
+      value: 50,
+    },
+    opacity: {
+      value: 0.5,
+    },
+    shape: {
+      type: "circle",
+    },
+    size: {
+      random: true,
+      value: 3,
+    },
+  },
+  detectRetina: true,
+};
+
+const CodeBlock = ({ inline, className, children }) => {
   const match = /language-(\w+)/.exec(className || "");
   return !inline && match ? (
     <div className="relative">
-      <pre className={`bg-gray-800 p-3 rounded-lg overflow-x-auto ${className}`}>
-        <code>{children}</code>
-      </pre>
+      <SyntaxHighlighter language={match[1]} style={coy}>
+        {String(children).replace(/\n$/, "")}
+      </SyntaxHighlighter>
       <CopyToClipboard text={String(children).trim()}>
         <button
           className="absolute top-1 right-1 bg-gray-700 hover:bg-gray-600 text-white p-1 rounded transition-colors"
@@ -33,231 +92,225 @@ const CodeBlock: React.FC<CodeProps> = ({ inline, className, children }) => {
     <code className={className}>{children}</code>
   );
 };
+
 const Sidebar = () => {
   const navigation = [
-    {
-      href: "javascript:void(0)",
-      name: "Overview",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122"
-          />
-        </svg>
-      ),
-    },
-    {
-      href: "javascript:void(0)",
-      name: "Integration",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z"
-          />
-        </svg>
-      ),
-    },
-    {
-      href: "javascript:void(0)",
-      name: "Plans",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-          />
-        </svg>
-      ),
-    },
-    {
-      href: "javascript:void(0)",
-      name: "Transactions",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 3c2.755 0 5.004 2.085 5.235 4.75h.015c.855 0 1.63.343 2.204.902l3.563 3.456a.734.734 0 010 1.084l-3.563 3.456a3.104 3.104 0 01-2.204.902h-.015c-.23 2.665-2.48 4.75-5.235 4.75-2.763 0-5.02-2.099-5.24-4.735L4.57 17.25a3.105 3.105 0 01-2.204-.902L.802 12.892a.734.734 0 010-1.084L2.366 8.35a3.105 3.105 0 012.204-.902l2.19-.015C6.98 5.085 9.237 3 12 3z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M20.25 15V9"
-          />
-        </svg>
-      ),
-    },
-    {
-      href: "javascript:void(0)",
-      name: "Documents",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19.5 10.5V6.75A2.25 2.25 0 0017.25 4.5h-5.466a2.25 2.25 0 00-1.591.659l-4.5 4.5a2.25 2.25 0 00-.659 1.591v6.25A2.25 2.25 0 007.75 19.5h9.5a2.25 2.25 0 002.25-2.25z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 4.5v5.25a1.5 1.5 0 001.5 1.5h5.25m-5.868.25h-3.482a1 1 0 00-1 1v5.5a1 1 0 001 1h7.964a1 1 0 001-1v-5.5a1 1 0 00-1-1h-1.982"
-          />
-        </svg>
-      ),
-    },
+    { href: "personalized/", name: "Personalized AI", icon: <FontAwesomeIcon icon={faStopCircle} /> },
+    { href: "#", name: "Integration", icon: <FontAwesomeIcon icon={faStopCircle} /> },
+    { href: "#", name: "Settings", icon: <FontAwesomeIcon icon={faCog} /> },
+    { href: "#", name: "Profile", icon: <FontAwesomeIcon icon={faUser} /> },
+    { href: "#", name: "Help", icon: <FontAwesomeIcon icon={faQuestionCircle} /> },
   ];
+
   return (
-    <div className="flex flex-col w-64 h-screen py-8 bg-gray-800 border-r dark:bg-gray-900 dark:border-gray-700">
-      <h2 className="text-3xl font-semibold text-center text-white">
-        LINGA AI
-      </h2>
-
-      <div className="flex flex-col items-center mt-6 -mx-2">
-        <img
-          className="object-cover w-24 h-24 mx-2 rounded-full"
-          src="https://images.unsplash.com/photo-1499714608240-22fc6ad53fb2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=200"
-          alt="avatar"
-        />
-        <h4 className="mx-2 mt-2 font-medium text-white">User Name</h4>
-        <p className="mx-2 mt-1 text-sm font-medium text-gray-400">
-          Linga-AI@yogesh.com
-        </p>
-      </div>
-
-      <div className="flex flex-col justify-between flex-1 mt-6">
-        <nav>
-          {navigation.map((item, index) => (
-            <a
-              key={index}
+    <motion.aside
+      className="flex flex-col justify-between w-64 h-screen px-4 py-8 relative"
+      style={{ backgroundColor: colors.primary, borderRight: `1px solid ${colors.secondary}` }}
+      initial={{ x: -300 }}
+      animate={{ x: 0 }}
+      transition={{ type: "spring", stiffness: 80 }}
+    >
+      <Particles params={particlesOptions} className="absolute inset-0" />
+      <div className="relative z-10">
+        <h1 className="text-2xl font-bold" style={{ color: colors.accent }}>
+          Linga AI
+        </h1>
+        <nav className="flex flex-col mt-6 space-y-2">
+          {navigation.map((item, idx) => (
+            <motion.a
+              key={idx}
+              className="flex items-center px-4 py-2 transition-colors transform rounded-md"
+              style={{ color: colors.textSecondary }}
               href={item.href}
-              className="flex items-center px-4 py-2 text-gray-600 transition-colors duration-300 transform hover:bg-gray-700 hover:text-gray-200"
+              whileHover={{ scale: 1.05, backgroundColor: colors.accent, color: colors.primary }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 80, duration: 0.2 }}
             >
               {item.icon}
               <span className="mx-4 font-medium">{item.name}</span>
-            </a>
+            </motion.a>
           ))}
         </nav>
       </div>
-    </div>
+    </motion.aside>
   );
 };
 
-export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, stop } = useChat();
-  const [typing, setTyping] = useState(false);
+const TypingIndicator = () => (
+  <motion.div
+    className="flex items-center mt-2"
+    style={{ color: colors.textSecondary }}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ yoyo: Infinity, duration: 0.5 }}
+  >
+    <FontAwesomeIcon icon={faRobot} className="mr-2" />
+    <span>Linga-AI is typing...</span>
+  </motion.div>
+);
 
-  return (
-    <div className="flex w-screen h-screen">
-      <Sidebar />
-      <div className="flex flex-col flex-1 p-4">
-        <div className="flex-1 overflow-y-auto mb-4">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`my-2 flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+const Chat = () => {
+  const { messages, input, handleInputChange, handleSubmit, stop } = useChat();
+  const [isTyping, setIsTyping] = useState(false);
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].role === "assistant") {
+      setShowTypingIndicator(false);
+    }
+  }, [messages]);
+
+  const handleInputChangeAndTyping = (e) => {
+    handleInputChange(e);
+    setIsTyping(true);
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setShowTypingIndicator(true);
+    await handleSubmit(e);
+    setIsTyping(false);
+  };
+
+  const handleStop = () => {
+    stop();
+    setIsTyping(false);
+    setShowTypingIndicator(false);
+  };
+
+return (
+  <div
+    className="flex h-screen overflow-hidden"
+    style={{ backgroundColor: colors.primary, color: colors.text }}
+  >
+    <Sidebar />
+    <div className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col items-center justify-center overflow-y-auto p-4 space-y-4">
+        <div className="flex flex-col flex-grow space-y-4 w-full max-w-3xl">
+          {messages.map((m, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 80 }}
+              className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div className={`flex items-start ${message.role === "user" ? "flex-row-reverse" : ""}`}>
-                <Avatar.Root className="inline-flex items-center justify-center align-middle overflow-hidden select-none w-8 h-8 rounded-full">
-                  <Avatar.Image
-                    className="w-full h-full object-cover"
-                    src={
-                      message.role === "user"
-                        ? "https://www.w3schools.com/howto/img_avatar.png"
-                        : "https://www.w3schools.com/howto/img_avatar2.png"
-                    }
-                    alt={message.role}
-                  />
-                </Avatar.Root>
-                <div className={`ml-2 ${message.role === "user" ? "text-right" : ""}`}>
-                  <div className="flex items-center">
-                    <strong>{message.role === "user" ? "You" : "LingaGPT"}</strong>
-                    <span className="ml-2 text-xs text-gray-500">
-                      {new Date().toLocaleTimeString()}
-                    </span>
-                  </div>
-                  <div className="text-sm mt-1">
-                    <Markdown components={{ code: CodeBlock }}>
-                      {message.content}
-                    </Markdown>
-                  </div>
-                </div>
-              </div>
-            </div>
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 80 }}
+                className={`p-4 rounded-lg shadow-md max-w-lg ${
+                  m.role === "user" ? "bg-accent text-white" : "bg-black text-white border border-accent"
+                }`}
+              >
+                <Markdown components={{ code: CodeBlock }}>{m.content}</Markdown>
+              </motion.div>
+            </motion.div>
           ))}
+          {showTypingIndicator && <TypingIndicator />}
+          <div ref={messagesEndRef} /> {/* Scroll into view */}
+          <div /> {/* Additional div to ensure visibility */}
         </div>
-        <form onSubmit={handleSubmit} className="flex">
+      </main>
+      <motion.div
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 100 }}
+        className="flex justify-center w-full mb-4"
+      >
+        <form
+          onSubmit={handleFormSubmit}
+          className="flex items-center w-full max-w-2xl mt-4 p-2 rounded-lg shadow-lg"
+          style={{
+            backgroundColor: colors.secondary,
+            borderColor: colors.accent,
+            borderWidth: "1px",
+          }}
+        >
+          <motion.button
+            type="button"
+            className="p-2 rounded-full transition-transform transform hover:scale-110"
+            style={{ color: colors.textSecondary }}
+            whileHover={{ scale: 1.1, color: colors.text }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FontAwesomeIcon icon={faMicrophone} />
+          </motion.button>
           <input
+            className="flex-1 p-2 mx-2 rounded outline-none"
             type="text"
-            value={input}
-            onChange={(e) => {
-              handleInputChange(e);
-              setTyping(true);
-            }}
             placeholder="Type a message..."
-            className="flex-1 border border-gray-300 p-2 rounded"
+            value={input}
+            onChange={handleInputChangeAndTyping}
+            style={{
+              backgroundColor: colors.primary,
+              color: colors.text,
+            }}
           />
-          <button
+          <motion.button
             type="submit"
-            className={`ml-2 px-4 py-2 bg-blue-500 text-white rounded ${
-              typing ? "animate-pulse" : ""
-            }`}
+            className="p-2 rounded-full transition-transform transform hover:scale-110"
+            style={{ color: colors.textSecondary }}
+            whileHover={{ scale: 1.1, color: colors.text }}
+            whileTap={{ scale: 0.9 }}
           >
             <FontAwesomeIcon icon={faPaperPlane} />
-          </button>
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={handleStop}
+            className="p-2 rounded-full transition-transform transform hover:scale-110"
+            style={{ color: colors.textSecondary }}
+            whileHover={{ scale: 1.1, color: colors.text }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FontAwesomeIcon icon={faStopCircle} />
+          </motion.button>
+          <motion.button
+            type="button"
+            className="p-2 rounded-full transition-transform transform hover:scale-110"
+            style={{ color: colors.textSecondary }}
+            whileHover={{ scale: 1.1, color: colors.text }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FontAwesomeIcon icon={faImage} />
+          </motion.button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button className="ml-2 px-4 py-2 bg-gray-500 text-white rounded">
-                <FontAwesomeIcon icon={faStopCircle} />
-              </button>
+              <motion.button
+                type="button"
+                className="p-2 rounded-full transition-transform transform hover:scale-110"
+                style={{ color: colors.textSecondary }}
+                whileHover={{ scale: 1.1, color: colors.text }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <FontAwesomeIcon icon={faCog} />
+              </motion.button>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content className="w-48 bg-white rounded-md shadow-lg">
-              <DropdownMenu.Item onSelect={stop} className="p-2">
-                Stop Generating
+            <DropdownMenu.Content
+              sideOffset={5}
+              className="p-2 bg-gray-800 rounded shadow-lg"
+              style={{ borderColor: colors.accent }}
+            >
+              <DropdownMenu.Item
+                className="px-4 py-2 text-white rounded hover:bg-gray-700"
+                onSelect={() => console.log("Settings clicked")}
+              >
+                Settings
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Root>
         </form>
-      </div>
+      </motion.div>
     </div>
-  );
-}
+  </div>
+);
+
+};
+
+export default Chat;
