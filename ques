@@ -8,3 +8,6 @@ Unlike traditional frameworks, Astro generates static HTML at build time, allowi
 
 
 It supports a wide range of front-end technologies, including React, Vue, and Svelte, making it flexible and adaptable for various development needs
+
+Astro's approach to partial hydration means that only the interactive parts of the page are hydrated with JavaScript, which helps reduce the overall JavaScript footprint and enhances performance.
+With its built-in support for Markdown and other content formats, Astro is ideal for building content-heavy sites like blogs, documentation, and portfolios.
