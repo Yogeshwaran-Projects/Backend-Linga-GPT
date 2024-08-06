@@ -3,3 +3,5 @@ we use astro because its very easy to make chat kinda things and end to end encr
 
 
 Astro is a modern front-end framework designed to build fast, optimized websites by focusing on speed and performance.
+
+Unlike traditional frameworks, Astro generates static HTML at build time, allowing for minimal client-side JavaScript and improved load times.
